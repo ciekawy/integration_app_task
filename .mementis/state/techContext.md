@@ -1,8 +1,8 @@
 ---
 mb_meta:
   project: Integration.app Bi-Directional Contact Sync
-  version: 1.0.0
-  lastUpdated: '2025-07-07T15:46:00Z'
+  version: 1.1.0
+  lastUpdated: '2025-07-07T16:28:00Z'
   authors:
     - Cline
 ---
@@ -51,7 +51,14 @@ This document outlines the technology stack, architecture, and key technical dec
 -   A one-time setup script (`/api/integration/setup/pronouns`) will be provided to programmatically create a custom "pronouns" field in both HubSpot and Pipedrive via their APIs.
 -   The UI will display a banner prompting the user to run this setup if the field is not detected. The sync will gracefully handle the absence of the field by not syncing pronoun data until it is configured.
 
-## 4. MVP Constraints & Scalability Considerations
+## 4. Development Principles (Assessment Task Priority)
+
+-   **KISS (Keep It Simple, Stupid):** Primary principle - prioritize simplicity and clarity over complexity. Avoid over-engineering for this assessment task.
+-   **DRY (Don't Repeat Yourself):** Secondary principle - eliminate code duplication where it improves maintainability without sacrificing simplicity.
+-   **File Size Management:** Keep files under 400-500 lines unless there's a clear reason to maintain larger files (e.g., single cohesive responsibility, artificial breakdowns would reduce readability).
+-   **Good Enough Implementation:** Focus on delivering a solid, working solution that demonstrates competency rather than production-perfect code.
+
+## 5. MVP Constraints & Scalability Considerations
 
 -   **Data Volume:** The MVP architecture is designed for a low volume of contacts (e.g., <500).
 -   **Background Jobs:** For the prototype, webhook processing and polling will be handled by Vercel's serverless functions.

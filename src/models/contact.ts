@@ -10,6 +10,8 @@ export interface IContact {
   customerId: string;
   createdAt: Date;
   updatedAt: Date;
+  syncedToCRMs?: string[];
+  lastAppModified?: Date;
 }
 
 const contactSchema = new mongoose.Schema<IContact>(
@@ -51,6 +53,13 @@ const contactSchema = new mongoose.Schema<IContact>(
       trim: true,
       index: true,
     },
+    syncedToCRMs: {
+      type: [String],
+      default: [],
+    },
+    lastAppModified: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
@@ -60,4 +69,4 @@ const contactSchema = new mongoose.Schema<IContact>(
 // Create compound indices for common queries
 contactSchema.index({ customerId: 1, createdAt: -1 });
 
-export const Contact = mongoose.models.Contact || mongoose.model<IContact>('Contact', contactSchema); 
+export const Contact = mongoose.models.Contact || mongoose.model<IContact>('Contact', contactSchema);
