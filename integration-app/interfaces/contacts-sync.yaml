@@ -1,0 +1,134 @@
+name: ContactsSync
+description: Universal interface for bi-directional contact synchronization
+version: 1.0.0
+
+actions:
+  listContacts:
+    description: Retrieve contacts from CRM with optional filtering
+    input:
+      type: object
+      properties:
+        lastModified:
+          type: string
+          format: date-time
+          description: Filter contacts modified after this timestamp
+        limit:
+          type: integer
+          default: 50
+          description: Maximum number of contacts to return
+        offset:
+          type: integer
+          default: 0
+          description: Pagination offset
+    output:
+      type: object
+      properties:
+        contacts:
+          type: array
+          items:
+            $ref: '#/definitions/UniversalContact'
+        hasMore:
+          type: boolean
+          description: Whether more results are available
+        total:
+          type: integer
+          description: Total count of contacts
+
+  getContact:
+    description: Retrieve a specific contact by ID
+    input:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Contact ID in the CRM
+      required: [id]
+    output:
+      $ref: '#/definitions/UniversalContact'
+
+  createContact:
+    description: Create a new contact in the CRM
+    input:
+      $ref: '#/definitions/UniversalContact'
+    output:
+      $ref: '#/definitions/UniversalContact'
+
+  updateContact:
+    description: Update an existing contact in the CRM
+    input:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Contact ID in the CRM
+        contact:
+          $ref: '#/definitions/UniversalContact'
+      required: [id, contact]
+    output:
+      $ref: '#/definitions/UniversalContact'
+
+  upsertContact:
+    description: Create or update a contact (preferred for sync operations)
+    input:
+      type: object
+      properties:
+        externalId:
+          type: string
+          description: External identifier for deduplication
+        contact:
+          $ref: '#/definitions/UniversalContact'
+      required: [contact]
+    output:
+      $ref: '#/definitions/UniversalContact'
+
+  deleteContact:
+    description: Delete a contact from the CRM
+    input:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Contact ID in the CRM
+      required: [id]
+    output:
+      type: object
+      properties:
+        success:
+          type: boolean
+        id:
+          type: string
+
+definitions:
+  UniversalContact:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier in the CRM
+      name:
+        type: string
+        description: Full name of the contact
+      email:
+        type: string
+        format: email
+        description: Primary email address
+      phone:
+        type: string
+        description: Primary phone number
+      jobTitle:
+        type: string
+        description: Job title or position
+      pronouns:
+        type: string
+        description: Preferred pronouns (custom field)
+      lastModified:
+        type: string
+        format: date-time
+        description: Last modification timestamp
+      createdAt:
+        type: string
+        format: date-time
+        description: Creation timestamp
+    required:
+      - name
+      - email

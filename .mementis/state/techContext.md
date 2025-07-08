@@ -1,8 +1,8 @@
 ---
 mb_meta:
   project: Integration.app Bi-Directional Contact Sync
-  version: 1.1.0
-  lastUpdated: '2025-07-07T16:28:00Z'
+  version: 1.5.0
+  lastUpdated: '2025-07-07T19:16:00Z'
   authors:
     - Cline
 ---
@@ -58,7 +58,32 @@ This document outlines the technology stack, architecture, and key technical dec
 -   **File Size Management:** Keep files under 400-500 lines unless there's a clear reason to maintain larger files (e.g., single cohesive responsibility, artificial breakdowns would reduce readability).
 -   **Good Enough Implementation:** Focus on delivering a solid, working solution that demonstrates competency rather than production-perfect code.
 
-## 5. MVP Constraints & Scalability Considerations
+## 5. API Documentation & External Service Dependencies
+
+-   **Integration.app API:** Primary dependency for universal CRM actions. Configuration files (`integration-app/interfaces/contacts-sync.yaml`, provider templates) define the contract.
+-   **HubSpot API:** v3 REST API for contacts. May need to fetch current API documentation for field mappings, webhook formats, and custom field creation.
+-   **Pipedrive API:** v2 REST API for persons. May need to fetch current API documentation for field mappings and rate limits.
+-   **Documentation Caching Strategy:**
+    -   **Source of Truth:** The primary source for API information is the official vendor documentation.
+    -   **Initial Scaffolding:** Use `docs-map.md` files to get a high-level overview of the documentation landscape for each service.
+    -   **Focused Caching:** For complex or large APIs (like OpenAPI specs), extract only the relevant sections for our use case into a focused `*-summary.md` file (e.g., `persons-api-v2-summary.md`).
+    -   **Verification:** Use the cached summaries and OpenAPI specs to build and verify our Integration.app templates.
+-   **Cached Resources:**
+    -   `.mementis/docs/integration-app/actions-structure.md`
+    -   `.mementis/docs/hubspot/contacts-api-v3.md`
+    -   `.mementis/docs/pipedrive/pipedrive_openapi-v2.yaml` (Full Spec - very large file)
+    -   `.mementis/docs/pipedrive/persons-api-v2-summary.md` (Focused Summary)
+-   **Field Mapping Decisions:**
+    -   **Pipedrive Email/Phone:** Pipedrive stores email/phone as an array of objects. For this prototype, we will sync only the **primary** email and phone number to our application's single `email` and `phone` string fields. This transformation will occur in the `PipedriveClient`.
+
+## 6. Database Schema Evolution & Migrations
+
+-   **Current Phase (MVP/PoC):** No formal migration system required. MongoDB's schemaless nature allows for incremental field additions without breaking existing data.
+-   **Schema Changes:** New fields added to existing models (`Contact.syncedToCRMs`, `Contact.lastAppModified`) are optional and will gracefully default for existing records.
+-   **New Collections:** New models (`ContactLink`, `SyncLog`, `ConflictLog`) are standalone and don't affect existing data.
+-   **Future Production Considerations:** For production deployment, consider implementing a migration system using tools like `migrate-mongo` or custom migration scripts to handle schema changes, data transformations, and index updates safely across environments.
+
+## 6. MVP Constraints & Scalability Considerations
 
 -   **Data Volume:** The MVP architecture is designed for a low volume of contacts (e.g., <500).
 -   **Background Jobs:** For the prototype, webhook processing and polling will be handled by Vercel's serverless functions.

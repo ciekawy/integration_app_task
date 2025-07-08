@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# membrane cli (integration.app)
+membrane.config.yml
+membrane/

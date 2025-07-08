@@ -1,0 +1,172 @@
+# Pipedrive Provider Template for Persons (Contacts)
+# NOTE: This file defines the actions and webhooks for Pipedrive.
+# It should be uploaded/configured in the Integration.app workspace.
+
+# Action 1: List Persons
+---
+name: List Pipedrive Persons
+key: list-pipedrive-persons
+type: connector-operation
+connector: pipedrive
+config:
+  operationKey: getPersons
+  input:
+    updated_since:
+      $var: $.input.lastModified
+    limit:
+      $var: $.input.limit
+    cursor:
+      $var: $.input.cursor
+inputSchema:
+  type: object
+  properties:
+    limit:
+      type: integer
+      default: 100
+    cursor:
+      type: string
+    lastModified:
+      type: string
+      format: date-time
+
+---
+# Action 2: Get Person by ID
+name: Get Pipedrive Person
+key: get-pipedrive-person
+type: find-data-record-by-id
+connector: pipedrive
+config:
+  dataSource:
+    collectionKey: persons
+  recordId:
+    $var: $.input.id
+inputSchema:
+  type: object
+  properties:
+    id:
+      type: string
+  required: [id]
+
+---
+# Action 3: Create Person
+name: Create Pipedrive Person
+key: create-pipedrive-person
+type: create-data-record
+connector: pipedrive
+config:
+  dataSource:
+    collectionKey: persons
+  fieldMapping:
+    defaultValue:
+      name:
+        $var: $.input.name
+      email:
+        - value:
+            $var: $.input.email
+          primary: true
+      phone:
+        - value:
+            $var: $.input.phone
+          primary: true
+      # Note: Pronouns is a custom field and needs a key.
+      # This will be determined by the setup script.
+      # e.g., "a1b2c3d4e5f6...": { $var: $.input.pronouns }
+inputSchema:
+  type: object
+  properties:
+    name:
+      type: string
+    email:
+      type: string
+    phone:
+      type: string
+    pronouns:
+      type: string
+  required: [name]
+
+---
+# Action 4: Update Person
+name: Update Pipedrive Person
+key: update-pipedrive-person
+type: update-data-record
+connector: pipedrive
+config:
+  dataSource:
+    collectionKey: persons
+  recordId:
+    $var: $.input.id
+  fieldMapping:
+    defaultValue:
+      name:
+        $var: $.input.contact.name
+      email:
+        - value:
+            $var: $.input.contact.email
+          primary: true
+      phone:
+        - value:
+            $var: $.input.contact.phone
+          primary: true
+inputSchema:
+  type: object
+  properties:
+    id:
+      type: string
+    contact:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+  required: [id, contact]
+
+---
+# Action 5: Search Persons by Email
+name: Search Pipedrive Persons
+key: search-pipedrive-persons
+type: connector-operation
+connector: pipedrive
+config:
+  operationKey: searchPersons
+  input:
+    term:
+      $var: $.input.email
+    fields: "email"
+    exact_match: true
+inputSchema:
+  type: object
+  properties:
+    email:
+      type: string
+  required: [email]
+
+---
+# Action 6: Delete Person
+name: Delete Pipedrive Person
+key: delete-pipedrive-person
+type: delete-data-record
+connector: pipedrive
+config:
+  dataSource:
+    collectionKey: persons
+  recordId:
+    $var: $.input.id
+inputSchema:
+  type: object
+  properties:
+    id:
+      type: string
+  required: [id]
+
+---
+# Webhook Declarations
+webhooks:
+  personCreated:
+    event: "person.added"
+  personUpdated:
+    event: "person.updated"
+  personDeleted:
+    event: "person.deleted"

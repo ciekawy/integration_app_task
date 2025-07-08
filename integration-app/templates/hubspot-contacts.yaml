@@ -1,0 +1,214 @@
+# HubSpot Provider Template for ContactsSync
+# NOTE: This file defines the actions, data collections, and webhooks for HubSpot.
+# It should be uploaded/configured in the Integration.app workspace.
+
+# Action 1: Search Contacts (Corrected for lastModified filtering)
+---
+name: Search HubSpot Contacts
+key: search-hubspot-contacts
+type: connector-operation
+connector: hubspot
+config:
+  operationKey: search
+  input:
+    filterGroups:
+      - filters:
+          - propertyName: "lastmodifieddate"
+            operator: "GTE"
+            value:
+              $var: $.input.lastModified
+    properties: ["firstname", "lastname", "email", "phone", "jobtitle", "pronouns", "lastmodifieddate", "createdate"]
+    limit:
+      $var: $.input.limit
+    after:
+      $var: $.input.offset
+inputSchema:
+  type: object
+  properties:
+    limit:
+      type: integer
+      default: 50
+    offset:
+      type: string # 'after' token is a string
+      default: "0"
+    lastModified:
+      type: string
+      format: date-time
+
+---
+# Action 2: Get Contact by ID
+name: Get HubSpot Contact
+key: get-hubspot-contact
+inputSchema:
+  type: object
+  properties:
+    id:
+      type: string
+  required: [id]
+type: find-data-record-by-id
+connector: hubspot
+config:
+  dataSource:
+    collectionKey: contacts
+  recordId:
+    $var: $.input.id
+
+---
+# Action 3: Create Contact
+name: Create HubSpot Contact
+key: create-hubspot-contact
+inputSchema:
+  type: object
+  properties:
+    name:
+      type: string
+    email:
+      type: string
+      format: email
+    phone:
+      type: string
+    jobTitle:
+      type: string
+    pronouns:
+      type: string
+  required: [name, email]
+type: create-data-record
+connector: hubspot
+config:
+  dataSource:
+    collectionKey: contacts
+  fieldMapping:
+    defaultValue:
+      firstname:
+        $var: $.input.name.split(' ')[0]
+      lastname:
+        $var: $.input.name.split(' ').slice(1).join(' ')
+      email:
+        $var: $.input.email
+      phone:
+        $var: $.input.phone
+      jobtitle:
+        $var: $.input.jobTitle
+      pronouns:
+        $var: $.input.pronouns
+
+---
+# Action 4: Update Contact
+name: Update HubSpot Contact
+key: update-hubspot-contact
+inputSchema:
+  type: object
+  properties:
+    id:
+      type: string
+    contact:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        jobTitle:
+          type: string
+        pronouns:
+          type: string
+  required: [id, contact]
+type: update-data-record
+connector: hubspot
+config:
+  dataSource:
+    collectionKey: contacts
+  recordId:
+    $var: $.input.id
+  fieldMapping:
+    defaultValue:
+      firstname:
+        $var: $.input.contact.name.split(' ')[0]
+      lastname:
+        $var: $.input.contact.name.split(' ').slice(1).join(' ')
+      email:
+        $var: $.input.contact.email
+      phone:
+        $var: $.input.contact.phone
+      jobtitle:
+        $var: $.input.contact.jobTitle
+      pronouns:
+        $var: $.input.contact.pronouns
+
+---
+# Action 5: Upsert Contact (Batch Upsert)
+name: Upsert HubSpot Contact
+key: upsert-hubspot-contact
+type: connector-operation
+connector: hubspot
+config:
+  operationKey: batch-upsert
+  input:
+    inputs:
+      - idProperty: "email"
+        properties:
+          firstname:
+            $var: $.input.contact.name.split(' ')[0]
+          lastname:
+            $var: $.input.contact.name.split(' ').slice(1).join(' ')
+          email:
+            $var: $.input.email
+          phone:
+            $var: $.input.contact.phone
+          jobtitle:
+            $var: $.input.contact.jobTitle
+          pronouns:
+            $var: $.input.contact.pronouns
+inputSchema:
+  type: object
+  properties:
+    email:
+      type: string
+      format: email
+    contact:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        jobTitle:
+          type: string
+        pronouns:
+          type: string
+  required: [email, contact]
+
+---
+# Action 6: Delete Contact
+name: Delete HubSpot Contact
+key: delete-hubspot-contact
+type: delete-data-record
+connector: hubspot
+config:
+  dataSource:
+    collectionKey: contacts
+  recordId:
+    $var: $.input.id
+inputSchema:
+  type: object
+  properties:
+    id:
+      type: string
+  required: [id]
+
+---
+# Webhook Declarations
+# These define the webhooks we expect to receive from HubSpot.
+# The implementation of the handler endpoints is in Epic 4.
+webhooks:
+  contactCreated:
+    event: "contact.creation"
+    # The handler for this will be at /api/integration/webhook/hubspot
+  contactUpdated:
+    event: "contact.propertyChange"
+    # The handler for this will be at /api/integration/webhook/hubspot
+  contactDeleted:
+    event: "contact.deletion"
+    # The handler for this will be at /api/integration/webhook/hubspot

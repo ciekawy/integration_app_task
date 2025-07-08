@@ -1,0 +1,85 @@
+name: Contacts API
+key: contacts-api
+type: http-endpoint
+description: >
+  Exposes endpoints for bi-directional contact sync.
+  Secured via Integration App Token auth.
+
+# 1) Enable Integration.app's JWT-based auth for inbound calls
+auth:
+  type: integration-app-token
+
+# 2) Define your endpoints, each wired to an Action you pushed earlier
+paths:
+  /hubspot/search:
+    post:
+      summary: Search HubSpot Contacts
+      actionKey: search-hubspot-contacts
+      auth:
+        required: true
+  /hubspot/get:
+    post:
+      summary: Get HubSpot Contact
+      actionKey: get-hubspot-contact
+      auth:
+        required: true
+  /hubspot/create:
+    post:
+      summary: Create HubSpot Contact
+      actionKey: create-hubspot-contact
+      auth:
+        required: true
+  /hubspot/update:
+    post:
+      summary: Update HubSpot Contact
+      actionKey: update-hubspot-contact
+      auth:
+        required: true
+  /hubspot/upsert:
+    post:
+      summary: Upsert HubSpot Contact
+      actionKey: upsert-hubspot-contact
+      auth:
+        required: true
+  /hubspot/delete:
+    post:
+      summary: Delete HubSpot Contact
+      actionKey: delete-hubspot-contact
+      auth:
+        required: true
+  /pipedrive/list:
+    post:
+      summary: List Pipedrive Persons
+      actionKey: list-pipedrive-persons
+      auth:
+        required: true
+  /pipedrive/get:
+    post:
+      summary: Get Pipedrive Person
+      actionKey: get-pipedrive-person
+      auth:
+        required: true
+  /pipedrive/create:
+    post:
+      summary: Create Pipedrive Person
+      actionKey: create-pipedrive-person
+      auth:
+        required: true
+  /pipedrive/update:
+    post:
+      summary: Update Pipedrive Person
+      actionKey: update-pipedrive-person
+      auth:
+        required: true
+  /pipedrive/search:
+    post:
+      summary: Search Pipedrive Persons
+      actionKey: search-pipedrive-persons
+      auth:
+        required: true
+  /pipedrive/delete:
+    post:
+      summary: Delete Pipedrive Person
+      actionKey: delete-pipedrive-person
+      auth:
+        required: true
